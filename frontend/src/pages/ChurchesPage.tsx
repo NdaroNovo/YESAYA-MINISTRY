@@ -1,58 +1,83 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, Plus } from "lucide-react"
-import api from "@/api/axios"
-
-interface Church {
-  id: number
-  name: string
-  mtaa: number
-  pastor_name: string
-  phone: string
-  member_count: number
-  is_active: boolean
-}
+import { fetchChurches } from "@/api/services/organization"
+import OrganizationFilters from "@/components/OrganizationFilters"
+import OrganizationBadge from "@/components/OrganizationBadge"
+import { useOrganizationLookup } from "@/hooks/useOrganizationLookup"
+import type { Church } from "@/types/organization"
 
 export default function ChurchesPage() {
+  const { mitaa, loading: lookupLoading, getMtaaName, getChurchesForMtaa } = useOrganizationLookup()
   const [churches, setChurches] = useState<Church[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedMtaa, setSelectedMtaa] = useState<number | "">("")
+  const [selectedChurch, setSelectedChurch] = useState<number | "">("")
 
   useEffect(() => {
-    api.get("/churches/")
-      .then((res) => setChurches(res.data.results || res.data))
+    const params = selectedMtaa ? { mtaa: selectedMtaa } : undefined
+    setLoading(true)
+    fetchChurches(typeof params?.mtaa === "number" ? params.mtaa : undefined)
+      .then(setChurches)
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [selectedMtaa])
 
-  if (loading) return <p className="text-muted-foreground">Inapakia...</p>
+  const filteredChurches = useMemo(() => {
+    if (!selectedChurch) return churches
+    return churches.filter((item) => item.id === selectedChurch)
+  }, [churches, selectedChurch])
+
+  const churchesForFilter = getChurchesForMtaa(selectedMtaa || null)
+
+  if (loading || lookupLoading) return <p className="text-muted-foreground">Inapakia...</p>
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-navy">Church Management</h1>
-          <p className="text-sm text-muted-foreground">Usimamizi wa Makanisa yote</p>
+          <p className="text-sm text-muted-foreground">
+            Makanisa yote ({churches.length}) — yamepangwa kwa mtaa
+          </p>
         </div>
         <Button variant="gold">
           <Plus className="w-4 h-4 mr-2" /> Ongeza Kanisa
         </Button>
       </div>
 
-      {churches.length > 0 ? (
+      <OrganizationFilters
+        mitaa={mitaa}
+        churches={churches}
+        selectedMtaa={selectedMtaa}
+        selectedChurch={selectedChurch}
+        onMtaaChange={setSelectedMtaa}
+        onChurchChange={setSelectedChurch}
+        filteredChurches={selectedMtaa ? churchesForFilter : churches}
+      />
+
+      {filteredChurches.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {churches.map((c) => (
+          {filteredChurches.map((c) => (
             <Card key={c.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Users className="w-4 h-4 text-gold" />
                   {c.name}
                 </CardTitle>
+                <OrganizationBadge
+                  mtaaName={c.mtaa_name ?? getMtaaName(c.mtaa)}
+                  churchName={null}
+                />
               </CardHeader>
               <CardContent className="text-sm space-y-1">
                 <p><span className="text-muted-foreground">Mchungaji:</span> {c.pastor_name || "—"}</p>
                 <p><span className="text-muted-foreground">Simu:</span> {c.phone || "—"}</p>
                 <p><span className="text-muted-foreground">Wanachama:</span> {c.member_count}</p>
+                {c.jimbo_name && (
+                  <p><span className="text-muted-foreground">Jimbo:</span> {c.jimbo_name}</p>
+                )}
               </CardContent>
             </Card>
           ))}

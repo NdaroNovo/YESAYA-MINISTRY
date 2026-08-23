@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, Plus } from "lucide-react"
 import api from "@/api/axios"
+import { extractListResults } from "@/lib/api-utils"
+import OrganizationBadge from "@/components/OrganizationBadge"
+import { useOrganizationLookup } from "@/hooks/useOrganizationLookup"
 
 interface UserItem {
   id: number
@@ -11,6 +14,10 @@ interface UserItem {
   full_name: string
   role: string
   is_active: boolean
+  assigned_mtaa?: number | null
+  assigned_mtaa_name?: string | null
+  assigned_church?: number | null
+  assigned_church_name?: string | null
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -22,17 +29,18 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 export default function UsersPage() {
+  const { getMtaaName, getChurchName, loading: lookupLoading } = useOrganizationLookup()
   const [users, setUsers] = useState<UserItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.get("/users/")
-      .then((res) => setUsers(res.data.results || res.data))
+      .then((res) => setUsers(extractListResults<UserItem>(res.data)))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <p className="text-muted-foreground">Inapakia...</p>
+  if (loading || lookupLoading) return <p className="text-muted-foreground">Inapakia...</p>
 
   return (
     <div className="space-y-6">
@@ -55,6 +63,7 @@ export default function UsersPage() {
                 <th className="px-4 py-3 text-left">Username</th>
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Jukumu</th>
+                <th className="px-4 py-3 text-left">Mtaa / Kanisa</th>
                 <th className="px-4 py-3 text-center">Hali</th>
               </tr>
             </thead>
@@ -65,6 +74,12 @@ export default function UsersPage() {
                   <td className="px-4 py-3">{u.username}</td>
                   <td className="px-4 py-3">{u.email || "—"}</td>
                   <td className="px-4 py-3">{ROLE_LABELS[u.role] || u.role}</td>
+                  <td className="px-4 py-3">
+                    <OrganizationBadge
+                      mtaaName={u.assigned_mtaa_name ?? getMtaaName(u.assigned_mtaa)}
+                      churchName={u.assigned_church_name ?? getChurchName(u.assigned_church)}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs ${u.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                       {u.is_active ? "Active" : "Inactive"}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">#1e3a5f</item>
+        <item name="colorPrimaryDark">#152a45</item>
+        <item name="colorAccent">#FFD700</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">#1e3a5f</item>
+        <item name="android:navigationBarColor">#1e3a5f</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:statusBarColor">#1e3a5f</item>
+        <item name="android:navigationBarColor">#1e3a5f</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>

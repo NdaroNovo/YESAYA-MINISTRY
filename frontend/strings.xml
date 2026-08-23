@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YESAYA MINISTRY</string>
+    <string name="title_activity_main">YESAYA MINISTRY</string>
+    <string name="package_name">com.yesayaministry.app</string>
+    
+    <!-- Permissions -->
+    <string name="permission_rationale_location">Location permission is needed for tracking church locations</string>
+    <string name="permission_rationale_storage">Storage permission is needed for uploading files</string>
+    <string name="permission_rationale_camera">Camera permission is needed for taking photos</string>
+    
+    <!-- Error Messages -->
+    <string name="error_network">No internet connection. Please check your network settings.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_unknown">An unknown error occurred.</string>
+    
+    <!-- Success Messages -->
+    <string name="success_data_saved">Data saved successfully</string>
+    <string name="success_data_updated">Data updated successfully</string>
+    <string name="success_data_deleted">Data deleted successfully</string>
+</resources>

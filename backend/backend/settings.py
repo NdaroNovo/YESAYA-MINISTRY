@@ -73,6 +73,15 @@ if DATABASE_URL.startswith("sqlite"):
 else:
     import dj_database_url
     DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+    
+    # Additional PostgreSQL settings for remote connection
+    if "postgresql" in DATABASE_URL or "postgres" in DATABASE_URL:
+        DATABASES["default"].update({
+            "CONN_MAX_AGE": 600,  # Persistent connections for 10 minutes
+            "OPTIONS": {
+                "connect_timeout": 10,
+            },
+        })
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -91,7 +100,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# For Render deployment, use persistent disk storage
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", BASE_DIR / "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -121,6 +131,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://srv-d94ldti8qa3s73cuk85g.onrender.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -128,6 +139,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://srv-d94ldti8qa3s73cuk85g.onrender.com",
 ]
 
 SECURE_BROWSER_XSS_FILTER = True
